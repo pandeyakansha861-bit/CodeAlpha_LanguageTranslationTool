@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Language Translation Tool | CodeAlpha Project</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons for polished, modern UI elements -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="brand-badge">
+                <i class="fa-solid fa-brain"></i> CodeAlpha AI Internship &bull; Project 1
+            </div>
+            <h1 class="app-title">
+                <span class="gradient-text">Polyglot AI</span> Translator
+            </h1>
+            <p class="app-subtitle">
+                Accurate, real-time natural language translation powered by advanced translation APIs.
+            </p>
+        </header>
+
+        <!-- Notification / Error Banner -->
+        <div id="alertBanner" class="alert-banner hidden" role="alert">
+            <div class="alert-content">
+                <i id="alertIcon" class="fa-solid fa-circle-exclamation"></i>
+                <span id="alertMessage">An error occurred.</span>
+            </div>
+            <button id="alertCloseBtn" class="alert-close" aria-label="Close Alert">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Main Translation Workbench -->
+        <main class="translator-card">
+            <!-- Language Selection Toolbar -->
+            <div class="toolbar">
+                <div class="lang-select-wrapper">
+                    <label for="sourceLang" class="visually-hidden">Source Language</label>
+                    <i class="fa-solid fa-globe lang-icon"></i>
+                    <select id="sourceLang" class="lang-select" aria-label="Select Source Language">
+                        <option value="auto">Auto Detect</option>
+                        <option value="en" selected>English</option>
+                        <!-- Other languages populated dynamically via JS -->
+                    </select>
+                </div>
+
+                <button id="swapLangBtn" class="btn-icon swap-btn" title="Swap languages" aria-label="Swap source and target languages">
+                    <i class="fa-solid fa-right-left"></i>
+                </button>
+
+                <div class="lang-select-wrapper">
+                    <label for="targetLang" class="visually-hidden">Target Language</label>
+                    <i class="fa-solid fa-language lang-icon"></i>
+                    <select id="targetLang" class="lang-select" aria-label="Select Target Language">
+                        <option value="es" selected>Spanish</option>
+                        <!-- Other languages populated dynamically via JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Translation Panels: Input & Output -->
+            <div class="panels-grid">
+                <!-- Source Text Panel -->
+                <div class="panel source-panel">
+                    <div class="panel-header">
+                        <span class="panel-label">Source Text</span>
+                        <div class="panel-header-actions">
+                            <button id="clearBtn" class="btn-action" title="Clear input text" aria-label="Clear text">
+                                <i class="fa-solid fa-trash-can"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="textarea-wrapper">
+                        <textarea 
+                            id="sourceText" 
+                            class="translation-textarea" 
+                            placeholder="Type or paste text here to translate... (e.g. Hello, how are you?)" 
+                            maxlength="5000"
+                            rows="7"
+                            spellcheck="true"
+                        ></textarea>
+                    </div>
+
+                    <div class="panel-footer">
+                        <div class="footer-left">
+                            <button id="speakSourceBtn" class="btn-icon-subtle" title="Listen to source text" aria-label="Pronounce source text">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <span class="shortcut-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to translate</span>
+                        </div>
+                        <div class="footer-right">
+                            <span id="charCount" class="char-count">0 / 5,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Translated Text Panel -->
+                <div class="panel target-panel">
+                    <div class="panel-header">
+                        <span class="panel-label">Translation</span>
+                        <div class="panel-header-actions">
+                            <span id="providerBadge" class="provider-badge hidden">
+                                <i class="fa-solid fa-bolt"></i> <span id="providerName">API</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="textarea-wrapper output-wrapper">
+                        <!-- Loading State Spinner Overlay -->
+                        <div id="loadingOverlay" class="loading-overlay hidden">
+                            <div class="spinner"></div>
+                            <span class="loading-text">Translating text...</span>
+                        </div>
+
+                        <textarea 
+                            id="targetText" 
+                            class="translation-textarea output-textarea" 
+                            placeholder="Translation will appear here..." 
+                            readonly 
+                            rows="7"
+                        ></textarea>
+                    </div>
+
+                    <div class="panel-footer">
+                        <div class="footer-left">
+                            <button id="speakTargetBtn" class="btn-icon-subtle" title="Listen to translation" aria-label="Pronounce translated text">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                        <div class="footer-right">
+                            <button id="copyBtn" class="btn-action btn-copy" title="Copy translation to clipboard" aria-label="Copy translated text">
+                                <i class="fa-regular fa-copy"></i>
+                                <span id="copyBtnText">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Translate Action Trigger -->
+            <div class="action-container">
+                <button id="translateBtn" class="btn-primary" aria-label="Translate Text">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Translate Now</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Features & Technology Showcase Footer -->
+        <footer class="app-footer">
+            <div class="footer-meta">
+                <span><i class="fa-solid fa-shield-halved"></i> Secure Server-Side Proxy</span>
+                <span>&bull;</span>
+                <span><i class="fa-solid fa-bolt"></i> Real Translation API</span>
+                <span>&bull;</span>
+                <span><i class="fa-solid fa-mobile-screen"></i> Mobile Responsive</span>
+            </div>
+            <p class="footer-copy">
+                Built for <strong>CodeAlpha AI Internship</strong> &bull; Clean Architecture & Responsive UI
+            </p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="toast hidden">Copied to clipboard!</div>
+
+    <!-- Custom Frontend Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
